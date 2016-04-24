@@ -1,12 +1,8 @@
 import ImageProcessing.Histogram;
 import org.opencv.core.Mat;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,15 +26,15 @@ public class RGBLoader {
             InputStream is = new FileInputStream(file);
             Histogram hist = new Histogram();
             List<Mat> referenceHist = null;
-            List<Mat> currentHist = null;
-            ArrayList<Double> differences = new ArrayList<Double>();
+            List<Mat> currentHist;
+            ArrayList<Double> differences = new ArrayList<>();
             for(int i = 0; i < totalFrames; i++){
 
                 long len = width*height*3;
                 byte[] bytes = new byte[(int)len];
 
                 int offset = 0;
-                int numRead = 0;
+                int numRead;
                 while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
                     offset += numRead;
                 }
@@ -55,8 +51,6 @@ public class RGBLoader {
             }
 
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
