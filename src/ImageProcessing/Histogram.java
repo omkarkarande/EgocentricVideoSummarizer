@@ -1,6 +1,5 @@
 package ImageProcessing;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,7 +23,7 @@ public class Histogram{
     private List<Mat> histograms;
 
     public Histogram(){
-        System.out.println("Jewbudbujslxmk");
+        System.out.println("Version 2");
     }
 
     private void computeChannelHistograms(){

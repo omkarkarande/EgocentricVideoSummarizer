@@ -1,11 +1,15 @@
 import org.opencv.core.Core;
+import player.*;
 
-/**
- * Created by omi on 4/23/16.
- */
 public class Main {
     public static void main(String[] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        new RGBLoader(args[0]);
+	Player AVPlayer = new Player(args[0],args[1]);
+
+	AVPlayer.loadAudio();
+	AVPlayer.loadVideo();
+	AVPlayer.initialize();
+    new RGBLoader(args[0]);
     }
+
 }
