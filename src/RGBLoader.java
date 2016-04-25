@@ -1,4 +1,5 @@
 import ImageProcessing.Histogram;
+import ImageProcessing.RGBSummarize;
 import org.opencv.core.Mat;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,10 @@ public class RGBLoader {
     private double MAX_DIFF = 259200;
     private double THRESHOLD = 0.35 * MAX_DIFF;
 
+    private ArrayList<Integer> referenceFrames;
+
     public RGBLoader(String filename){
+        this.referenceFrames = new ArrayList<>();
         loadRGB(filename);
     }
 
@@ -65,7 +69,7 @@ public class RGBLoader {
 
                 if (referenceHist == null){
                     referenceHist = hist.getHistogram(bytes, width, height);
-                    ImageIO.write(img, "jpg", new File("/home/omi/Documents/samples/sample" + i + ".jpg"));
+                    referenceFrames.add(i);
                     continue;
                 }else{
                     currentHist = hist.getHistogram(bytes, width, height);
@@ -74,13 +78,16 @@ public class RGBLoader {
                 if (hist.getDifference(currentHist, referenceHist, 3) >= THRESHOLD){
                     System.out.println("Threshold crossed.");
                     referenceHist = currentHist;
-                    ImageIO.write(img, "jpg", new File("/home/omi/Documents/samples/sample" + i + ".jpg"));
+                    referenceFrames.add(i);
                 }
 
             }
 
+            RGBSummarize summarize = new RGBSummarize(new FileInputStream(file), totalFrames, width, height);
+            summarize.dumpFrames(referenceFrames);
 
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
