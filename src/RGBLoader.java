@@ -1,12 +1,11 @@
 import ImageProcessing.Histogram;
+import ImageProcessing.RGBSummarize;
 import org.opencv.core.Mat;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,7 +14,13 @@ import java.util.List;
  */
 public class RGBLoader {
 
+    private double MAX_DIFF = 259200;
+    private double THRESHOLD = 0.35 * MAX_DIFF;
+
+    private ArrayList<Integer> referenceFrames;
+
     public RGBLoader(String filename){
+        this.referenceFrames = new ArrayList<>();
         loadRGB(filename);
     }
 
@@ -30,34 +35,59 @@ public class RGBLoader {
             InputStream is = new FileInputStream(file);
             Histogram hist = new Histogram();
             List<Mat> referenceHist = null;
-            List<Mat> currentHist = null;
-            ArrayList<Double> differences = new ArrayList<Double>();
+            List<Mat> currentHist;
+            ArrayList<Double> differences = new ArrayList<>();
+            BufferedImage img;
             for(int i = 0; i < totalFrames; i++){
-
+                img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 long len = width*height*3;
                 byte[] bytes = new byte[(int)len];
 
                 int offset = 0;
-                int numRead = 0;
+                int numRead;
                 while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
                     offset += numRead;
                 }
 
+                //Generate Buffered Image
+                int ind = 0;
+                for(int y = 0; y < height; y++){
+
+                    for(int x = 0; x < width; x++){
+
+                        byte a = 0;
+                        byte r = bytes[ind];
+                        byte g = bytes[ind+height*width];
+                        byte b = bytes[ind+height*width*2];
+
+                        int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+                        //int pix = ((a << 24) + (r << 16) + (g << 8) + b);
+                        img.setRGB(x,y,pix);
+                        ind++;
+                    }
+                }
+
                 if (referenceHist == null){
                     referenceHist = hist.getHistogram(bytes, width, height);
+                    referenceFrames.add(i);
                     continue;
                 }else{
                     currentHist = hist.getHistogram(bytes, width, height);
                 }
 
-                differences.add(hist.getDifference(referenceHist, currentHist, 3));
-                System.out.println(Collections.max(differences));
+                if (hist.getDifference(currentHist, referenceHist, 3) >= THRESHOLD){
+                    System.out.println("Threshold crossed.");
+                    referenceHist = currentHist;
+                    referenceFrames.add(i);
+                }
+
             }
 
+            RGBSummarize summarize = new RGBSummarize(new FileInputStream(file), totalFrames, width, height);
+            summarize.dumpFrames(referenceFrames);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
