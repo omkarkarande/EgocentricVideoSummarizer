@@ -28,6 +28,7 @@ public class AudioPlayer {
         audioInputStream = null;
         audioInputStream = AudioSystem.getAudioInputStream(this.waveStream);
         audioClip = AudioSystem.getClip();
+        audioClip.open(audioInputStream);
         audioFormat = audioClip.getFormat();
         audioFrameRate = audioFormat.getFrameRate();
     }
