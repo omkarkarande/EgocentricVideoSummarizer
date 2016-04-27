@@ -10,7 +10,7 @@ public class AudioSummarizing{
   private InputStream waveStream;
   private AudioInputStream audioInputStream;
   private AudioFormat audioFormat;
-  private int mainThreshold = 1000;
+  private int mainThreshold = 1200;
 
 
 
@@ -35,6 +35,11 @@ public class AudioSummarizing{
            ms  += buffer[i];
      ms /= buffer.length;
      return ms;
+  }
+
+  public void printArray(double[] buffer){
+    for (int i = 0; i < buffer.length; i++)
+           System.out.print(buffer[i]+ " ");
   }
 
 
@@ -70,7 +75,7 @@ public class AudioSummarizing{
 
      }
      int meanIdx = 0;
-     Set secs = new HashSet<Integer>();
+     Set secs = new TreeSet<Integer>();
      for(int time = 0 ; time<600; time+=20){
 
 
@@ -81,24 +86,31 @@ public class AudioSummarizing{
                 meanIdx++;
          }
 
+         printArray(buffer);
+
          double windowThreshold = meanSquare(buffer);
+
+         System.out.println("Mean "+windowThreshold);
 
          for(int i = 0;i < 20;i++){
 
-                if(buffer[i] >= mainThreshold /*&& buffer[i] >= windowThreshold*/){
-                              if((time+i-2) > 0){
+                if(buffer[i] >= mainThreshold && buffer[i] >= windowThreshold){
+                              /*if((time+i-2) > 0){
                                 secs.add(time+i-2);
                               }
                               if((time+i-1) > 0){
                                 secs.add(time+i-1);
                               }
+                              */
                               secs.add(time+i);
+                              /*
                               if((time+i+1) < 600){
                                 secs.add(time+i+1);
                               }
                               if((time+i+2) < 600){
                                 secs.add(time+i+2);
                               }
+                              */
                 }
          }
 
