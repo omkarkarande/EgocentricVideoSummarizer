@@ -12,7 +12,11 @@ public class WAVSummarize {
     private static InputStream waveStream;
     private static AudioInputStream audioInputStream;
     private static AudioFormat audioFormat;
-    private static int mainThreshold = 1200;
+    private static int MAINTHRESHOLD = 800;
+    private static int AUDIOTIME = 600;
+    private static int WINDOWSIZE = 20;
+
+    private static int AUDIO_BUFFER_SIZE = 12000;
     private static int audioFrameRate;
     private static int audioLengthInSeconds;
 
@@ -78,8 +82,8 @@ public class WAVSummarize {
         int audioIdx = 0;
         double[] buffer;
         for (int time = 0; time < sampleSize; time++) {
-            buffer = new double[12000];
-            for (int i = 0; i < 12000; i++) {
+            buffer = new double[AUDIO_BUFFER_SIZE];
+            for (int i = 0; i < AUDIO_BUFFER_SIZE; i++) {
 
                 buffer[i] = audioData[audioIdx];
                 audioIdx++;
@@ -88,18 +92,37 @@ public class WAVSummarize {
         }
 
         int meanIdx = 0;
-        for (int time = 0; time < 600; time += 20) {
-            buffer = new double[20];
-            for (int i = 0; i < 20; i++) {
-                buffer[i] = meanSq[meanIdx];
-                meanIdx++;
-            }
-            double windowThreshold = meanSquare(buffer);
-            for (int i = 0; i < 20; i++) {
-                if (buffer[i] >= mainThreshold && buffer[i] >= windowThreshold) {
-                    secs.add(time + i);
-                }
-            }
+        for (int time = 0; time < sampleSize; time += WINDOWSIZE) {
+            buffer = new double[WINDOWSIZE];
+               for (int i = 0; i < WINDOWSIZE; i++) {
+                         buffer[i] = meanSq[meanIdx];
+                         meanIdx++;
+               }
+               double windowThreshold = meanSquare(buffer);
+               for (int i = 0; i < WINDOWSIZE; i++) {
+                   if (buffer[i] >= MAINTHRESHOLD && buffer[i] >= windowThreshold) {
+                             secs.add(time + i);
+                   }
+              }
+        }
+
+
+        System.out.println(secs);
+        Integer[] arrayList = secs.toArray(new Integer[secs.size()]);
+
+        secs.clear();
+        for(int i = 0 ; i < arrayList.length-2;i++){
+
+             if((arrayList[i+1] - arrayList[i] == 1)){
+
+                     if( (arrayList[i+2] - arrayList[i+1] == 1))
+                       {
+                           System.out.println("Element to add "+arrayList[i]);
+                           secs.add((int)arrayList[i]);
+                        }
+
+             }
+
         }
         return secs;
     }
