@@ -27,15 +27,16 @@ public class Summarizer {
         //call image summarizer
         RGBSummarize rgbSummarize = new RGBSummarize(IMAGE_FILE_NAME);
         ArrayList<Integer> imageFrames = rgbSummarize.processRGB();
-        //System.out.println("Image Frames Length: " + imageFrames.size());
+        //set the frames to keep
         for (int frame : imageFrames) {
             framesToKeep[frame] = true;
         }
+
+
         //call audio summarizer
         WAVSummarize wavSummarize = new WAVSummarize(AUDIO_FILE_NAME);
         ArrayList<Integer> audioFrames = wavSummarize.getTimeStamps();
-        //System.out.println("Audio Frames Length: " + audioFrames.size());
-        //System.out.println(audioFrames);
+        //set the frames to keep
         for (int i = 0; i < audioFrames.size(); i++) {
             int timeStamp = audioFrames.get(i);
             framesToKeep[(int) Math.floor(timeStamp * (float) FRAME_WINDOW / 2.0)] = true;
@@ -57,9 +58,13 @@ public class Summarizer {
             index += 1;
         }
 
-
+        //Write the files out
         RGBWriter imageWriter = new RGBWriter(IMAGE_FILE_NAME);
-        imageWriter.writeFrames(framesToKeep, new File(outputFile + ".rgb"));
+        try {
+            imageWriter.writeFrames(framesToKeep, new File(outputFile + ".rgb"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         WAVWriter audioWriter = new WAVWriter(AUDIO_FILE_NAME);
         audioWriter.writeFrames(framesToKeep, new File(outputFile + ".wav"));
