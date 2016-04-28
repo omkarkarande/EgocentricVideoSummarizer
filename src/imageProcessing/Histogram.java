@@ -21,6 +21,7 @@ public class Histogram{
     }
 
     private void computeChannelHistograms(){
+
         this.histograms = new ArrayList<Mat>();
         Core.split(this.IMAGE, this.histograms);
 
@@ -42,32 +43,24 @@ public class Histogram{
         this.histograms.add(b_hist);
     }
 
-    public List<Mat> getHistogram(BufferedImage image){
-        byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        this.IMAGE = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-        this.IMAGE.put(0, 0, pixels);
-        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2BGR);
-        computeChannelHistograms();
-        return this.histograms;
-    }
     public List<Mat> getHistogram(byte[] image, int width, int height){
+
         // load image into OpenCV Mat 8UC3 = 8 bits 3 channels
         this.IMAGE = new Mat(height, width, CvType.CV_8UC3);
         this.IMAGE.put(0, 0, image);
-        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2BGR);
         computeChannelHistograms();
         return this.histograms;
     }
 
-    public double getDifference(List<Mat> histogramA, List<Mat> histogramB, int numChannels){
-        double value = 0.0;
+    public double getDifference(List<Mat> referenceHist, List<Mat> currentHist, int numChannels){
 
+        double value = 0.0;
         for (int i = 0; i < numChannels; i++){
             Mat diff = new Mat();
-            absdiff(histogramA.get(i), histogramB.get(i), diff);
+            absdiff(referenceHist.get(i), currentHist.get(i), diff);
             value += sumElems(diff).val[0];
         }
 
-        return value / 3.0;
+        return value / numChannels;
     }
 }

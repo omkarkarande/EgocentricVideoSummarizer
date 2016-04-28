@@ -1,8 +1,9 @@
 import audioProcessing.*;
 import imageProcessing.*;
 
+import java.io.File;
 import java.util.ArrayList;
-
+import MediaWriter.*;
 
 public class Summarizer {
 
@@ -23,20 +24,23 @@ public class Summarizer {
         //call image summarizer
         ImageProcessing rgbSummarize = new ImageProcessing(IMAGE_FILE_NAME,4500,480,270);
         ArrayList<Integer> imageFrames = rgbSummarize.generateKeyFrames();
-        System.out.println("Image Frames Length: " + imageFrames.size());
+        //System.out.println("Image Frames Length: " + imageFrames.size());
         for(int frame: imageFrames){
             framesToKeep[frame] = true;
         }
         //call audio summarizer
         AudioProcessing wavSummarize = new AudioProcessing(AUDIO_FILE_NAME);
         ArrayList<Integer> audioFrames = wavSummarize.processAudio();
-        System.out.println("Audio Frames Length: " + audioFrames.size());
+        //System.out.println("Audio Frames Length: " + audioFrames.size());
         for(int i = 0; i < audioFrames.size(); i++){
             int timeStamp = audioFrames.get(i);
             framesToKeep[(int)Math.floor(timeStamp * 7.5)] = true;
         }
 
-        int index = 0;
+        int index = 16;
+        for(int i = 1; i < index; i++){
+            framesToKeep[i] = true;
+        }
         while(index < framesToKeep.length){
             if (framesToKeep[index]){
                 for(int j = index - 14; j >= 0 && j<framesToKeep.length && j<=index + 15; j++){
@@ -48,5 +52,11 @@ public class Summarizer {
             }
         }
 
+
+        RGBWriter imageWriter = new RGBWriter(IMAGE_FILE_NAME);
+        imageWriter.writeFrames(framesToKeep, new File("/home/sailesh/Documents/summarized.rgb"));
+
+        WAVWriter audioWriter = new WAVWriter(AUDIO_FILE_NAME);
+        audioWriter.writeFrames(framesToKeep, new File("/home/sailesh/Documents/summarized.wav"));
     }
 }

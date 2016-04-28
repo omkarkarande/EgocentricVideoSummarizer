@@ -1,36 +1,22 @@
 package audioProcessing;
 
-import player.PlayWaveException;
-
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import biz.source_code.dsp.signal.ActivityDetector;
-import biz.source_code.dsp.signal.EnvelopeDetector;
-
-
-/**
- * Created by sailesh on 4/26/16.
- */
 public class AudioProcessing {
 
     private InputStream waveStream;
     private AudioInputStream audioInputStream;
     private int AUDIO_FRAMERATE;
-    private int THRESHOLD = 800;
+    private int THRESHOLD = 500;
     private int durationInSec;
-    static float[] audioData ;
-    private int stepsPerSec;
+    private static float[] audioData ;
+    private int stepsPerSec = 2;
 
 
     public AudioProcessing(String fileName)
@@ -41,21 +27,13 @@ public class AudioProcessing {
             AUDIO_FRAMERATE = (int)audioInputStream.getFormat().getFrameRate();
             durationInSec = (int)(audioInputStream.getFrameLength() / AUDIO_FRAMERATE);
             audioData = new float[AUDIO_FRAMERATE * durationInSec];
-            stepsPerSec = 2;
-            //System.out.println("------------------Audio FrAME RATE: " + audioInputStream.getFormat().toString() + "..." +durationInSec);
-
         }
-        catch (UnsupportedAudioFileException e1) {
+        catch (UnsupportedAudioFileException | FileNotFoundException e1) {
             e1.printStackTrace();
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e1) {
+        } catch (IOException e1) {
             e1.printStackTrace();
         }
 
-        processAudio();
     }
 
     public double meanSquare(double[] buffer){
@@ -78,14 +56,12 @@ public class AudioProcessing {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
     public void normalizeAudioData(double[] audioDataPerStep, double[] audioMeanPer10Sec) {
 
         int steps = audioDataPerStep.length;
-        int steps10Sec = audioMeanPer10Sec.length;
         int stepSize = AUDIO_FRAMERATE/stepsPerSec;
         int data10SecCount = 0;
         for(int i = 0; i < steps;i++)
@@ -103,10 +79,8 @@ public class AudioProcessing {
                     mean+=audioDataPerStep[k];
                 }
                 mean = mean/20;
-                //System.out.println("*********Mean 10 secs: "+audioDataPerStep[i] + " - (" + i + ")\n\n\n\n");
                 audioMeanPer10Sec[data10SecCount++] = mean;
             }
-            //System.out.println(audioDataPerStep[i] + " - (" + i + ")");
         }
 
     }
@@ -116,11 +90,15 @@ public class AudioProcessing {
         ArrayList<Integer> list = new ArrayList<>();
         int steps = durationInSec * stepsPerSec;
         double[] audioDataPerStep = new double[steps];
+        //THRESHOLD = (int)meanSquare(audioDataPerStep);
+
         double[] audioMeanPer10Sec = new double[durationInSec/10];
         generateAudioDataFromIS();
         normalizeAudioData(audioDataPerStep,audioMeanPer10Sec);
+        System.out.println("Threshold: " + THRESHOLD);
+        THRESHOLD = (int)meanSquare(audioDataPerStep);
+        System.out.println("Threshold: " + THRESHOLD);
 
-        int count = 0;
         for(int i=0 ; i<audioDataPerStep.length -2;i++)
         {
             if (audioDataPerStep[i] > THRESHOLD && audioDataPerStep[i+1] > THRESHOLD && audioDataPerStep[i+2] > THRESHOLD )
@@ -128,12 +106,9 @@ public class AudioProcessing {
                 if (audioDataPerStep[i] > audioMeanPer10Sec[i/20] && audioDataPerStep[i+1] > audioMeanPer10Sec[i/20]  && audioDataPerStep[i+2] > audioMeanPer10Sec[i/20])
                 {
                     list.add(i);
-                    count++;
                 }
             }
         }
-        System.out.println("\n\n"+list);
-        System.out.println("\nCount : " + list.size());
 
     return list;
     }
