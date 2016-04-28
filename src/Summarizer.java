@@ -34,28 +34,32 @@ public class Summarizer {
         WAVSummarizeSailesh wavSummarize = new WAVSummarizeSailesh(AUDIO_FILE_NAME);
         ArrayList<Integer> audioFrames = wavSummarize.getTimeStamps();
         System.out.println("Audio Frames Length: " + audioFrames.size());
+        System.out.println(audioFrames);
         for(int i = 0; i < audioFrames.size(); i++){
             int timeStamp = audioFrames.get(i);
             framesToKeep[(int)Math.floor(timeStamp * 7.5)] = true;
         }
 
-        int lastFrameKept = -1;
-        ArrayList<Integer> framesKept = new ArrayList<>();
-        for(int i = 0; i<framesToKeep.length; i++){
-            if (framesToKeep[i]){
-                if (lastFrameKept == -1){
-                    lastFrameKept = i;
-                    framesKept.add(i);
-                }else{
-                    if (i > lastFrameKept + 15 && !framesKept.contains(i)){
-                        lastFrameKept = i;
-                        framesKept.add(i);
-                    }
+        //Set all frames to keep
+        int index = 0;
+        while(index < framesToKeep.length){
+            if (framesToKeep[index]){
+                for(int j = index - 14; j >= 0 && j<framesToKeep.length && j<=index + 15; j++){
+                    framesToKeep[j] = true;
                 }
+                index += 16;
+            }else{
+                index += 1;
             }
         }
 
-        System.out.println(framesKept);
-        System.out.println(framesKept.size());
+        int count = 0;
+        for(boolean set:framesToKeep){
+            if(set){
+                count++;
+            }
+        }
+        System.out.println(count);
+
     }
 }
