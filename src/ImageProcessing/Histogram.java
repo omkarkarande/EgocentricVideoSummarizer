@@ -16,62 +16,76 @@ import static org.opencv.core.Core.sumElems;
  * Created by omi on 4/23/16.
  * Generates and return a histogram based on the bufferedimage passed
  */
-public class Histogram{
+public class Histogram {
 
     private Mat IMAGE;
     private List<Mat> histograms;
+    private static int CHANNELS = 3;
+    private static int VALUES_PER_CHANNEL = 256;
+    private static boolean ACCUMULATE = false;
 
-    public Histogram(){
+    /*
+    Constructor
+     */
+    public Histogram() {
     }
 
-    private void computeChannelHistograms(){
+    /*
+    Computes Histogram values for all channels in the image.
+     */
+    private void computeChannelHistograms() {
         this.histograms = new ArrayList<Mat>();
         Core.split(this.IMAGE, this.histograms);
 
-        MatOfInt histogramSize = new MatOfInt(256);
-        MatOfFloat histogramRange = new MatOfFloat(0f, 256f);
+        MatOfInt histogramSize = new MatOfInt(VALUES_PER_CHANNEL);
+        MatOfFloat histogramRange = new MatOfFloat(0f, (float) VALUES_PER_CHANNEL);
 
-        boolean accumulate = false;
-        Mat r_hist = new Mat();
-        Mat g_hist = new Mat();
-        Mat b_hist = new Mat();
-
-        Imgproc.calcHist(Arrays.asList(this.histograms.get(0)), new MatOfInt(0), new Mat(), r_hist, histogramSize, histogramRange, accumulate);
-        Imgproc.calcHist(Arrays.asList(this.histograms.get(1)), new MatOfInt(0), new Mat(), g_hist, histogramSize, histogramRange, accumulate);
-        Imgproc.calcHist(Arrays.asList(this.histograms.get(2)), new MatOfInt(0), new Mat(), b_hist, histogramSize, histogramRange, accumulate);
+        Mat[] hists = new Mat[CHANNELS];
+        for (int i = 0; i < CHANNELS; i++) {
+            hists[i] = new Mat();
+            Imgproc.calcHist(Arrays.asList(this.histograms.get(i)), new MatOfInt(0), new Mat(), hists[i], histogramSize, histogramRange, ACCUMULATE);
+        }
 
         this.histograms.clear();
-        this.histograms.add(r_hist);
-        this.histograms.add(g_hist);
-        this.histograms.add(b_hist);
+        for (int i = 0; i < CHANNELS; i++) {
+            this.histograms.add(hists[i]);
+        }
     }
 
-    public List<Mat> getHistogram(BufferedImage image){
+    /*
+    Takes in a BufferedImage and returns the Histogram
+    Returns and List of Mats where each Mat is the histogram for the corresponding channel
+     */
+    public List<Mat> getHistogram(BufferedImage image) {
         byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         this.IMAGE = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
         this.IMAGE.put(0, 0, pixels);
-        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2BGR);
         computeChannelHistograms();
         return this.histograms;
     }
-    public List<Mat> getHistogram(byte[] image, int width, int height){
+
+    /*
+    Takes in a byte[] representing the image and returns the Histogram
+    Returns and List of Mats where each Mat is the histogram for the corresponding channel
+     */
+    public List<Mat> getHistogram(byte[] image, int width, int height) {
         // load image into OpenCV Mat 8UC3 = 8 bits 3 channels
         this.IMAGE = new Mat(height, width, CvType.CV_8UC3);
         this.IMAGE.put(0, 0, image);
-        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2BGR);
         computeChannelHistograms();
         return this.histograms;
     }
 
-    public double getDifference(List<Mat> histogramA, List<Mat> histogramB, int numChannels){
+    /*
+    Calculates the mean absolute difference between two histograms for all channels
+     */
+    public double getDifference(List<Mat> histogramA, List<Mat> histogramB) {
         double value = 0.0;
-
-        for (int i = 0; i < numChannels; i++){
+        for (int i = 0; i < CHANNELS; i++) {
             Mat diff = new Mat();
             absdiff(histogramA.get(i), histogramB.get(i), diff);
             value += sumElems(diff).val[0];
         }
-
         return value / 3.0;
     }
 }

@@ -39,16 +39,16 @@ public class WAVSummarize {
     }
 
     public ArrayList<Integer> getTimeStamps() {
-        try{
+        try {
             return calAudioIntensities();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
     private double meanSquare(double[] buffer) {
-        int ms = 0;
+        double ms = 0;
         for (int i = 0; i < buffer.length; i++)
             ms += buffer[i];
         ms /= buffer.length;
@@ -91,37 +91,48 @@ public class WAVSummarize {
             meanSq[time] = meanSquare(buffer);
         }
 
+        System.out.println(Arrays.toString(meanSq));
+        //Standard Deviation Calculation
+        double MEAN = meanSquare(meanSq);
+        System.out.println(MEAN);
+        //Calculate Variance
+        double variance = 0.0;
+        for (int i = 0; i < meanSq.length; i++) {
+            variance += Math.pow((meanSq[i] - MEAN), 2);
+        }
+        variance /= sampleSize;
+        System.out.println(variance);
+        double standard_deviation = Math.sqrt(variance);
+        System.out.println(standard_deviation);
+
+
         int meanIdx = 0;
         for (int time = 0; time < sampleSize; time += WINDOWSIZE) {
             buffer = new double[WINDOWSIZE];
-               for (int i = 0; i < WINDOWSIZE; i++) {
-                         buffer[i] = meanSq[meanIdx];
-                         meanIdx++;
-               }
-               double windowThreshold = meanSquare(buffer);
-               for (int i = 0; i < WINDOWSIZE; i++) {
-                   if (buffer[i] >= MAINTHRESHOLD && buffer[i] >= windowThreshold) {
-                             secs.add(time + i);
-                   }
-              }
+            for (int i = 0; i < WINDOWSIZE; i++) {
+                buffer[i] = meanSq[meanIdx];
+                meanIdx++;
+            }
+            double windowThreshold = meanSquare(buffer);
+            for (int i = 0; i < WINDOWSIZE; i++) {
+                if (buffer[i] >= MAINTHRESHOLD && buffer[i] >= windowThreshold) {
+                    secs.add(time + i);
+                }
+            }
         }
 
-
-        System.out.println(secs);
         Integer[] arrayList = secs.toArray(new Integer[secs.size()]);
-
         secs.clear();
-        for(int i = 0 ; i < arrayList.length-2;i++){
 
-             if((arrayList[i+1] - arrayList[i] == 1)){
+        for (int i = 0; i < arrayList.length - 2; i++) {
 
-                     if( (arrayList[i+2] - arrayList[i+1] == 1))
-                       {
-                           System.out.println("Element to add "+arrayList[i]);
-                           secs.add((int)arrayList[i]);
-                        }
+            if ((arrayList[i + 1] - arrayList[i] == 1)) {
 
-             }
+                if ((arrayList[i + 2] - arrayList[i + 1] == 1)) {
+                    secs.add((int) arrayList[i]);
+                }
+
+            }
 
         }
         return secs;
