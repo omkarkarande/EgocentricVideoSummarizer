@@ -3,13 +3,20 @@ package audioProcessing;
 import player.PlayWaveException;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import biz.source_code.dsp.signal.ActivityDetector;
+import biz.source_code.dsp.signal.EnvelopeDetector;
+
 
 /**
  * Created by sailesh on 4/26/16.
@@ -18,14 +25,24 @@ public class AudioProcessing {
 
     private InputStream waveStream;
     private AudioInputStream audioInputStream;
-    double[] audioData;
-    private int VIDEO_FPS = 15;
+    private int AUDIO_FRAMERATE;
+    private int THRESHOLD = 800;
+    private int durationInSec;
+    static float[] audioData ;
+    private int stepsPerSec;
 
-    AudioProcessing(String fileName)
+
+    public AudioProcessing(String fileName)
     {
         try {
             waveStream = new FileInputStream(fileName);
             audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(waveStream));
+            AUDIO_FRAMERATE = (int)audioInputStream.getFormat().getFrameRate();
+            durationInSec = (int)(audioInputStream.getFrameLength() / AUDIO_FRAMERATE);
+            audioData = new float[AUDIO_FRAMERATE * durationInSec];
+            stepsPerSec = 2;
+            //System.out.println("------------------Audio FrAME RATE: " + audioInputStream.getFormat().toString() + "..." +durationInSec);
+
         }
         catch (UnsupportedAudioFileException e1) {
             e1.printStackTrace();
@@ -36,34 +53,91 @@ public class AudioProcessing {
         catch (IOException e1) {
             e1.printStackTrace();
         }
+
+        processAudio();
+    }
+
+    public double meanSquare(double[] buffer){
+        double ms = 0;
+        for (int i = 0; i < buffer.length; i++)
+            ms  += buffer[i];
+        ms /= buffer.length;
+        return ms;
+    }
+
+    public void generateAudioDataFromIS() {
+        for (int i = 0; i< audioData.length; i++) {
+
+            byte[] b = new byte[2];
+            try {
+                if (audioInputStream.read(b, 0, 2) != -1) {
+                    short num = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN).getShort();
+                    audioData[i] = Math.abs(num);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public void normalizeAudioData(double[] audioDataPerStep, double[] audioMeanPer10Sec) {
+
+        int steps = audioDataPerStep.length;
+        int steps10Sec = audioMeanPer10Sec.length;
+        int stepSize = AUDIO_FRAMERATE/stepsPerSec;
+        int data10SecCount = 0;
+        for(int i = 0; i < steps;i++)
+        {
+            double[] buffer = new double[stepSize];
+            int count = 0;
+            int j = i*stepSize;
+            while(count < stepSize)
+                buffer[count++] = audioData[j++];
+
+            audioDataPerStep[i] = meanSquare(buffer);
+            if(i%20 ==0 && i!=0) {
+                int mean = 0;
+                for(int k =i-20; k<i ; k++) {
+                    mean+=audioDataPerStep[k];
+                }
+                mean = mean/20;
+                //System.out.println("*********Mean 10 secs: "+audioDataPerStep[i] + " - (" + i + ")\n\n\n\n");
+                audioMeanPer10Sec[data10SecCount++] = mean;
+            }
+            //System.out.println(audioDataPerStep[i] + " - (" + i + ")");
+        }
+
     }
 
     public void processAudio() {
 
-        byte[] b = new byte[2];
+        LinkedList<Integer> list = new LinkedList<>();
+        int steps = durationInSec * stepsPerSec;
+        double[] audioDataPerStep = new double[steps];
+        double[] audioMeanPer10Sec = new double[durationInSec/10];
+        generateAudioDataFromIS();
+        normalizeAudioData(audioDataPerStep,audioMeanPer10Sec);
 
-        int index = 0;
-
-        ByteBuffer wrapped = ByteBuffer.wrap(b); // big-endian by default
-        wrapped.order(ByteOrder.LITTLE_ENDIAN);
-
-        for(int frame = 0; frame<4500 ;frame++)
+        int count = 0;
+        for(int i=0 ; i<audioDataPerStep.length -2;i++)
         {
-            double[] audioData = new double[1600];
-            for(int i=0; i<1600; i++) {
-                try {
-                    if(audioInputStream.read(b, 0, 2) != -1) {
-                        double num = wrapped.getDouble();
-                        audioData[i] = num;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            if (audioDataPerStep[i] > THRESHOLD && audioDataPerStep[i+1] > THRESHOLD && audioDataPerStep[i+2] > THRESHOLD )
+            {
+                if (audioDataPerStep[i] > audioMeanPer10Sec[i/20] && audioDataPerStep[i+1] > audioMeanPer10Sec[i/20]  && audioDataPerStep[i+2] > audioMeanPer10Sec[i/20])
+                {
+                    list.add(i);
+                    count++;
                 }
 
+                //System.out.println(audioDataPerStep[i] + " - (" + i + ")");
+                //count++;
+                //i++;
             }
-
-
         }
+        System.out.println("\n\n"+list);
+        System.out.println("\nCount : " + list.size());
+
 
     }
 }

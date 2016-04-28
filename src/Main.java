@@ -1,5 +1,6 @@
 import org.opencv.core.Core;
 import player.*;
+import audioProcessing.*;
 
 public class Main {
     public static void main(String[] args){
@@ -9,7 +10,9 @@ public class Main {
 	AVPlayer.loadAudio();
 	AVPlayer.loadVideo();
 	AVPlayer.initialize();
-    new RGBLoader(args[0]);
+    //new RGBLoader(args[0]);
+
+		AudioProcessing audio= new AudioProcessing(args[1]);
     }
 
 }
