@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -110,9 +111,9 @@ public class AudioProcessing {
 
     }
 
-    public void processAudio() {
+    public ArrayList<Integer> processAudio() {
 
-        LinkedList<Integer> list = new LinkedList<>();
+        ArrayList<Integer> list = new ArrayList<>();
         int steps = durationInSec * stepsPerSec;
         double[] audioDataPerStep = new double[steps];
         double[] audioMeanPer10Sec = new double[durationInSec/10];
@@ -129,15 +130,11 @@ public class AudioProcessing {
                     list.add(i);
                     count++;
                 }
-
-                //System.out.println(audioDataPerStep[i] + " - (" + i + ")");
-                //count++;
-                //i++;
             }
         }
         System.out.println("\n\n"+list);
         System.out.println("\nCount : " + list.size());
 
-
+    return list;
     }
 }
