@@ -4,9 +4,7 @@ import ImageProcessing.Histogram;
 import org.opencv.core.Mat;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -30,7 +28,7 @@ public class RGBWriter {
 
         try {
             InputStream is = new FileInputStream(file);
-
+            OutputStream os = new FileOutputStream(outputFile);
             for(int i = 0; i < frames.length; i++){
 
                 if (frames[i]){
@@ -43,8 +41,10 @@ public class RGBWriter {
                     while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
                         offset += numRead;
                     }
+                    os.write(bytes);
                 }
             }
+            os.close();
 
         } catch (Exception e) {
             e.printStackTrace();

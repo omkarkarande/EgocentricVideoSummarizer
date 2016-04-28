@@ -81,7 +81,7 @@ public class RGBSummarize {
                 }
 
                 if (hist.getDifference(currentHist, referenceHist, 3) >= THRESHOLD){
-                    System.out.println("Threshold crossed.");
+                    //System.out.println("Threshold crossed.");
                     referenceHist = currentHist;
                     referenceFrames.add(i);
                 }
