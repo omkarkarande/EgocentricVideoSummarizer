@@ -37,6 +37,7 @@ public class RGBWriter {
             if (frames[i]) {
                 bytes = loader.getNext((long) (i - 1 - lastFrameKept) * loader.getBytesPerFrame());
                 outputStream.write(bytes);
+                lastFrameKept = i;
             }
         }
         outputStream.close();

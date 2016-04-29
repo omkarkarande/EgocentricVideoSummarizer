@@ -42,6 +42,7 @@ public class Summarizer {
             framesToKeep[(int) Math.floor(timeStamp * (float) FRAME_WINDOW / 2.0)] = true;
         }
 
+
         //Set all frames to keep
         int index = FRAME_WINDOW + 1;
         //get the first 15 frames by default
@@ -50,13 +51,22 @@ public class Summarizer {
         }
         while (index < framesToKeep.length) {
             if (framesToKeep[index]) {
-                for (int j = index - FRAME_WINDOW - 1; j >= 0 && j < framesToKeep.length && j <= index + FRAME_WINDOW; j++) {
+                for (int j = index - FRAME_WINDOW + 1; j >= 0 && j < framesToKeep.length && j <= index + FRAME_WINDOW; j++) {
                     framesToKeep[j] = true;
                 }
                 index += FRAME_WINDOW;
             }
             index += 1;
         }
+
+        //count total frames set
+        int totalFrames = 0;
+        for(boolean set:framesToKeep){
+            if(set){
+                totalFrames += 1;
+            }
+        }
+        System.out.println(totalFrames);
 
         //Write the files out
         RGBWriter imageWriter = new RGBWriter(IMAGE_FILE_NAME);
@@ -67,7 +77,11 @@ public class Summarizer {
         }
 
         WAVWriter audioWriter = new WAVWriter(AUDIO_FILE_NAME);
-        audioWriter.writeFrames(framesToKeep, new File(outputFile + ".wav"));
+        try {
+            audioWriter.writeFrames(framesToKeep, totalFrames, new File(outputFile + ".wav"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 }

@@ -1,3 +1,5 @@
+import ImageProcessing.ImageClustering;
+import Player.AVPlayer;
 import org.opencv.core.Core;
 
 /**
@@ -6,7 +8,9 @@ import org.opencv.core.Core;
 public class Main {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        Summarizer summarizer = new Summarizer(args[0], args[1]);
-        summarizer.summarize("/home/omi/Documents/summarized");
+        //Summarizer summarizer = new Summarizer(args[0], args[1]);
+        //summarizer.summarize("/home/omi/Documents/summarized");
+        ImageClustering ic = new ImageClustering(args[0]);
+        ic.clusterImages();
     }
 }
