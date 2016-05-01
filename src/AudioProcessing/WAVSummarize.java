@@ -91,19 +91,19 @@ public class WAVSummarize {
             meanSq[time] = meanSquare(buffer);
         }
 
-        System.out.println(Arrays.toString(meanSq));
+        //System.out.println(Arrays.toString(meanSq));
         //Standard Deviation Calculation
         double MEAN = meanSquare(meanSq);
-        System.out.println(MEAN);
+        //System.out.println(MEAN);
         //Calculate Variance
         double variance = 0.0;
         for (int i = 0; i < meanSq.length; i++) {
             variance += Math.pow((meanSq[i] - MEAN), 2);
         }
         variance /= sampleSize;
-        System.out.println(variance);
+        //System.out.println(variance);
         double standard_deviation = Math.sqrt(variance);
-        System.out.println(standard_deviation);
+        //System.out.println(standard_deviation);
 
 
         int meanIdx = 0;

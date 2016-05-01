@@ -34,10 +34,8 @@ public class WAVWriter {
 
         //read zeroth frame
         byte[] bytes = loader.getNext();
-        System.out.println(Arrays.toString(bytes));
         System.arraycopy(bytes, 0, audio, offset, bytes.length);
         offset += bytes.length;
-        System.out.println(bytes.length);
         //read remaining frames
         for (int i = 1; i < frames.length; i++) {
             if (frames[i]) {
@@ -48,8 +46,7 @@ public class WAVWriter {
             }
         }
 
-
-        InputStream is = new ByteArrayInputStream(bytes);
+        InputStream is = new ByteArrayInputStream(audio);
         AudioInputStream outStream = new AudioInputStream(is, loader.getAudioFormat(), loader.getBytesPerFrame() * setFrames);
         AudioSystem.write(outStream, AudioFileFormat.Type.WAVE, outputFile);
     }

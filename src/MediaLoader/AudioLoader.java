@@ -34,7 +34,7 @@ public class AudioLoader {
 
     public byte[] getNext(long toSkip){
         try{
-            this.audioInputStream.skip(toSkip);
+            this.waveStream.skip(toSkip);
         } catch (IOException e) {
             e.printStackTrace();
         }

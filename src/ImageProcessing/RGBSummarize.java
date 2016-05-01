@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,6 +22,8 @@ public class RGBSummarize {
     private ImageLoader loader;
     private ArrayList<Integer> referenceFrames;
 
+    private static double CLUSTER_THRESHOLD = 0.25 * MAX_DIFF;
+
     public RGBSummarize(String filename) {
         loader = new ImageLoader(filename);
         referenceFrames = new ArrayList<>();
@@ -31,7 +34,6 @@ public class RGBSummarize {
         Histogram hist = new Histogram();
         List<Mat> referenceHist = null;
         List<Mat> currentHist;
-
 
         for (int i = 0; i < loader.getTotalFrames(); i++) {
             byte[] bytes = loader.getNext();
@@ -49,9 +51,10 @@ public class RGBSummarize {
                 referenceHist = currentHist;
                 referenceFrames.add(i);
             }
-        }
 
+        }
         //return the frames as a list of integers
         return referenceFrames;
     }
+
 }

@@ -1,6 +1,7 @@
 package Player;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
@@ -29,12 +30,12 @@ public class AVPlayer extends javax.swing.JFrame {
     public AVPlayer(String RGB_FILE, String AUDIO_FILE) {
         initComponents();
         try {
-            loadResources(RGB_FILE, AUDIO_FILE);
+            //loadResources(RGB_FILE, AUDIO_FILE);
 
             setLocationRelativeTo(null);
             setVisible(true);
 
-            play();
+            //play();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -110,6 +111,13 @@ public class AVPlayer extends javax.swing.JFrame {
 
     }
 
+    //USELESS
+    public void setFrame(BufferedImage img){
+        this.frameContainer.setIcon(new ImageIcon(img));
+    }
+    public void setColor(Color color){
+        this.controlContainer.setBackground(color);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

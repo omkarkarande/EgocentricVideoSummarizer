@@ -15,8 +15,8 @@ public class ImageLoader {
     private static int WIDTH = 480;
     private static int HEIGHT = 270;
     private static int CHANNELS = 3;
+    private static int PIXELS_PER_FRAME = WIDTH * HEIGHT;
     private static int BYTES_PER_FRAME = WIDTH * HEIGHT * CHANNELS;
-
     public ImageLoader(String filename) {
         //open the file for reading
         this.IMAGE_FILE = new File(filename);
@@ -73,5 +73,9 @@ public class ImageLoader {
 
     public int getChanels() {
         return this.CHANNELS;
+    }
+
+    public int getPixelsPerFrame(){
+        return this.PIXELS_PER_FRAME;
     }
 }

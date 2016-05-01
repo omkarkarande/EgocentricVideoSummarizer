@@ -66,7 +66,6 @@ public class Summarizer {
                 totalFrames += 1;
             }
         }
-        System.out.println(totalFrames);
 
         //Write the files out
         RGBWriter imageWriter = new RGBWriter(IMAGE_FILE_NAME);
