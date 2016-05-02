@@ -5,6 +5,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.ImageProducer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,6 +61,8 @@ public class Histogram {
         byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         this.IMAGE = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
         this.IMAGE.put(0, 0, pixels);
+
+        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2GRAY);
         computeChannelHistograms();
         return this.histograms;
     }
@@ -72,6 +75,7 @@ public class Histogram {
         // load image into OpenCV Mat 8UC3 = 8 bits 3 channels
         this.IMAGE = new Mat(height, width, CvType.CV_8UC3);
         this.IMAGE.put(0, 0, image);
+        //Imgproc.cvtColor(this.IMAGE, this.IMAGE, Imgproc.COLOR_RGB2GRAY);
         computeChannelHistograms();
         return this.histograms;
     }

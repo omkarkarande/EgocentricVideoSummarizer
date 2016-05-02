@@ -68,7 +68,7 @@ public class ImageClustering {
 
         Mat labels = new Mat();
         Mat clusters = new Mat();
-        Core.kmeans(images, BUCKETS, labels, new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 5, 0.0001), 5, Core.KMEANS_PP_CENTERS, clusters);
+        Core.kmeans(images, BUCKETS, labels, new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 1, 0.0001), 1, Core.KMEANS_PP_CENTERS, clusters);
         System.out.println("Clustering done");
         //set cluster metrics
         for(int i = 0; i < BUCKETS; i++){
