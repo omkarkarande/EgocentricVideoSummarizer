@@ -30,12 +30,12 @@ public class AVPlayer extends javax.swing.JFrame {
     public AVPlayer(String RGB_FILE, String AUDIO_FILE) {
         initComponents();
         try {
-            //loadResources(RGB_FILE, AUDIO_FILE);
+            loadResources(RGB_FILE, AUDIO_FILE);
 
             setLocationRelativeTo(null);
             setVisible(true);
 
-            //play();
+            play();
 
         } catch (Exception ex) {
             ex.printStackTrace();

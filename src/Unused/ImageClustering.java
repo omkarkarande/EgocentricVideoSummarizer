@@ -1,4 +1,4 @@
-package ImageProcessing;
+package Unused;
 
 import MediaLoader.ImageLoader;
 import Cluster.*;
@@ -78,7 +78,7 @@ public class ImageClustering {
         for (int i = 0; i < loader.getTotalFrames(); i++){
             int cluster_ID = (int)labels.get(i, 0)[0];
             Item item = new Item(i);
-            item.setAveragColor((int)images.get(i, 0)[0]);
+            item.setAverageColor((int)images.get(i, 0)[0]);
             CLUSTERS[cluster_ID].put(item);
         }
 

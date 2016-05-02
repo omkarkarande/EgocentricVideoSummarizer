@@ -1,8 +1,6 @@
 package Cluster;
 
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
@@ -13,6 +11,7 @@ import java.util.List;
  * Created by omi on 4/28/16.
  */
 public class Cluster {
+
     private int CLUSTER_ID;
     private double CLUSTER_METRIC = -1.0;
     private List<Mat> CLUSTER_HIST;
@@ -55,6 +54,11 @@ public class Cluster {
         this.CLUSTER_ITEMS.add(item);
         //updateMetric(item);
     }
+
+
+    /*
+    UNUSED FUNCTIONS.................................................................
+     */
 
     private void updateMetric(Item item) {
         if (this.CLUSTER_METRIC == -1.) {

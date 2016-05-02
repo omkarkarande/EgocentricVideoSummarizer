@@ -1,5 +1,6 @@
 package ImageProcessing;
 
+import Configurations.Settings;
 import MediaLoader.ImageLoader;
 import org.opencv.core.Mat;
 
@@ -15,14 +16,10 @@ import java.util.List;
  */
 public class RGBSummarize {
 
-    private static double MAX_DIFF = 259200;
-    private static double THRESHOLD_PERCENT = 0.35;
-    private static double THRESHOLD = THRESHOLD_PERCENT * MAX_DIFF;
+    private static double THRESHOLD = Settings.IMAGE_SUMMARY_THRESHOLD_PERCENT * Settings.MAX_HISTOGRAM_DIFFERENCE;
 
     private ImageLoader loader;
     private ArrayList<Integer> referenceFrames;
-
-    private static double CLUSTER_THRESHOLD = 0.25 * MAX_DIFF;
 
     public RGBSummarize(String filename) {
         loader = new ImageLoader(filename);
@@ -56,5 +53,4 @@ public class RGBSummarize {
         //return the frames as a list of integers
         return referenceFrames;
     }
-
 }

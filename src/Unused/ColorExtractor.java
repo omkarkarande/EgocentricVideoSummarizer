@@ -1,7 +1,6 @@
-package ImageProcessing;
+package Unused;
 
 import java.awt.*;
-import java.util.Arrays;
 
 /**
  * Created by omi on 4/28/16.

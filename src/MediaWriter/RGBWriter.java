@@ -1,6 +1,7 @@
 package MediaWriter;
 
 import MediaLoader.ImageLoader;
+
 import java.io.*;
 
 /**
@@ -40,6 +41,20 @@ public class RGBWriter {
                 lastFrameKept = i;
             }
         }
+        outputStream.close();
+    }
+
+    public void writeFrames(int startFrame, int endFrame, File outputFile) throws Exception {
+        OutputStream outputStream = new FileOutputStream(outputFile);
+        byte[] bytes;
+
+        loader.skip((long) (startFrame - 1) * loader.getBytesPerFrame());
+
+        for (int i = startFrame; i <= endFrame; i++) {
+            bytes = loader.getNext();
+            outputStream.write(bytes);
+        }
+
         outputStream.close();
     }
 }

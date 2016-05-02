@@ -6,13 +6,11 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * Created by omi on 4/27/16.
  */
 public class WAVWriter {
-    //TODO FIX THIS SHITE
     private AudioLoader loader;
 
     /*

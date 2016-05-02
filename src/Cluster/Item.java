@@ -1,7 +1,6 @@
 package Cluster;
 
 import org.opencv.core.Mat;
-
 import java.util.List;
 
 /**
@@ -17,8 +16,8 @@ public class Item {
         this.FRAME_NUMBER = frame;
     }
 
-    public void setAveragColor(int avg_color) {
-        this.AVG_COLOR = avg_color;
+    public int getFrameNumber() {
+        return this.FRAME_NUMBER;
     }
 
     public void setHistogram(List<Mat> histogram) {
@@ -29,11 +28,12 @@ public class Item {
         return this.HISTOGRAM;
     }
 
+    public void setAverageColor(int avgcolor) {
+        this.AVG_COLOR = avgcolor;
+    }
+
     public int getAVGColor() {
         return this.AVG_COLOR;
     }
 
-    public int getFrameNumber() {
-        return this.FRAME_NUMBER;
-    }
 }
