@@ -24,9 +24,9 @@ public class Main {
 
         RGBClustering clustering = new RGBClustering(args[0]);
         ArrayList<Cluster> clusters = clustering.getClusters();
-
         try {
-            Cluster[] matched = clustering.getClosest(args[2], 3);
+            ArrayList<Cluster> matched = clustering.getClosest(args[2], clusters, 3);
+            System.out.println(matched.size());
             Item bestMatch = clustering.getMatchWithinClusters(matched);
 
             System.out.println("BEST MATCH: " + bestMatch.getFrameNumber());

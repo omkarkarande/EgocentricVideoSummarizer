@@ -9,6 +9,7 @@ import org.opencv.core.Scalar;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,12 +28,12 @@ public class RGBClustering {
     private Histogram hist;
 
     private ImageLoader loader;
-    private ArrayList<Cluster> clusters;
+    private ArrayList<Cluster> CLUSTERS;
     private Item queryImage;
 
     public RGBClustering(String fileName) {
         this.loader = new ImageLoader(fileName);
-        this.clusters = new ArrayList<>();
+        this.CLUSTERS = new ArrayList<>();
         this.hist = new Histogram();
     }
 
@@ -54,9 +55,9 @@ public class RGBClustering {
                 Item item = new Item(i);
                 item.setHistogram(referenceHist);
                 cluster.put(item);
-                //cluster.setClusterHistogram(referenceHist);
+                cluster.setClusterHistogram(referenceHist);
 
-                System.out.println("Cluster: " + cluster.getID() + " --- " + item.getFrameNumber());
+                //System.out.println("Cluster: " + cluster.getID() + " --- " + item.getFrameNumber());
                 continue;
             } else {
                 currentHist = hist.getHistogram(bytes, loader.getWidth(), loader.getHeight());
@@ -64,7 +65,7 @@ public class RGBClustering {
 
             // add frame as reference frame is the threshold is crossed
             if (hist.getDifference(currentHist, referenceHist) >= CLUSTER_THRESHOLD) {
-                this.clusters.add(cluster);
+                this.CLUSTERS.add(cluster);
 
                 CLUSTER_ID += 1;
                 referenceHist = currentHist;
@@ -74,9 +75,9 @@ public class RGBClustering {
                 Item item = new Item(i);
                 item.setHistogram(referenceHist);
                 cluster.put(item);
-                //cluster.setClusterHistogram(referenceHist);
+                cluster.setClusterHistogram(referenceHist);
 
-                System.out.println("Cluster: " + cluster.getID() + " --- " + item.getFrameNumber());
+                //System.out.println("Cluster: " + cluster.getID() + " --- " + item.getFrameNumber());
             } else {
                 Item item = new Item(i);
                 item.setHistogram(currentHist);
@@ -86,25 +87,28 @@ public class RGBClustering {
         }
 
         //get reference histograms for each cluster
-        for (Cluster c: this.clusters){
+        /*
+        for (Cluster c : this.CLUSTERS) {
             c.calculateReferenceHistogram();
         }
+        */
 
-
-        return this.clusters;
+        return this.CLUSTERS;
     }
 
-    public Cluster[] getClosest(String fileName, int K) throws Exception {
+    public ArrayList<Cluster> getClosest(String fileName, ArrayList<Cluster> clusters, int K) throws Exception {
 
-        Cluster[] closest = new Cluster[K];
+        //Cluster[] closest = new Cluster[K];
         //BufferedImage image = ImageIO.read(new File(fileName));
+
+        ArrayList<Cluster> closest = new ArrayList<>();
 
         ImageLoader qLoader = new ImageLoader(fileName);
         qLoader.setWidth(1280);
         qLoader.setHeight(720);
 
         byte[] image = qLoader.getNext();
-
+        /*
         BufferedImage img = new BufferedImage(qLoader.getWidth(), qLoader.getHeight(), BufferedImage.TYPE_INT_RGB);
         int ind = 0;
         for(int y = 0; y < qLoader.getHeight(); y++){
@@ -124,7 +128,7 @@ public class RGBClustering {
         }
 
         ImageIO.write(img, "png", new File("/home/omi/Documents/sample.png"));
-
+        */
         List<Mat> imageHist = hist.getHistogram(image, 1280, 720);
         //SCALING
         imageHist = normalize(imageHist, 2.67, 2.67);
@@ -134,15 +138,24 @@ public class RGBClustering {
         queryImage.setHistogram(imageHist);
 
         ArrayList<Double> differences = new ArrayList<>();
-        for (int i = 0; i < this.clusters.size(); i++) {
-            differences.add(hist.getDifference(imageHist, this.clusters.get(i).getClusterHistogram()));
+        for (int i = 0; i < clusters.size(); i++) {
+            differences.add(hist.getDifference(imageHist, clusters.get(i).getClusterHistogram()));
         }
 
         //all clusters
+        /*
         for (int i = 0; i < K; i++) {
             int minIndex = differences.indexOf(Collections.min(differences));
             closest[i] = this.clusters.get(minIndex);
             differences.set(minIndex, Double.MAX_VALUE);
+        }*/
+        System.out.println("CLUSTER THRESH: " + this.CLUSTER_THRESHOLD);
+        System.out.println(differences);
+        for (int i = 0; i < differences.size(); i++) {
+            if (differences.get(i) <= CLUSTER_THRESHOLD) {
+                closest.add(clusters.get(i));
+                System.out.println("MILA");
+            }
         }
 
         return closest;
@@ -160,12 +173,12 @@ public class RGBClustering {
         return normalized;
     }
 
-    public Item getMatchWithinClusters(Cluster[] clusters) {
+    public Item getMatchWithinClusters(ArrayList<Cluster> clusters) {
         Item bestMatch = null;
         double difference = Double.MAX_VALUE;
-        for (int i = 0; i < clusters.length; i++) {
-            System.out.println("Cluster - " + clusters[i].getID() + " --- Reference Frame: " + clusters[i].getClusterItems().get(0).getFrameNumber());
-            ArrayList<Item> items = clusters[i].getClusterItems();
+        for (int i = 0; i < clusters.size(); i++) {
+            //System.out.println("Cluster - " + clusters.get(i).getID() + " --- Reference Frame: " + clusters.get(i).getClusterItems().get(0).getFrameNumber());
+            ArrayList<Item> items = clusters.get(i).getClusterItems();
             for (int j = 0; j < items.size(); j++) {
                 double diff = hist.getDifference(items.get(j).getHistogram(), this.queryImage.getHistogram());
                 if (diff < difference) {
