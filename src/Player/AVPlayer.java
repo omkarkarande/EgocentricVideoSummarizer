@@ -1,9 +1,14 @@
 package Player;
 
+import Configurations.Settings;
+import MediaLoader.ImageLoader;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.TimerTask;
+import java.util.Timer;
 
 /**
  * Created by omi on 4/24/16.
@@ -14,16 +19,14 @@ public class AVPlayer extends javax.swing.JFrame {
     private String FRAMES_FILE;
     private String AUDIO_FILE;
 
-    private int WIDTH = 480;
-    private int HEIGHT = 270;
-
     private boolean isPlaying;
-    private long seekPositionVideo;
-    private long seekPositionAudio;
+    private long seekPositionVideo = 0;
+    private long seekPositionAudio = 0;
 
     private AudioPlayer audioPlayer;
-    private InputStream frameStream;
+    private ImageLoader imageLoader;
 
+    private Timer timer;
     /**
      * Creates new form PlayerFrame
      */
@@ -31,11 +34,10 @@ public class AVPlayer extends javax.swing.JFrame {
         initComponents();
         try {
             loadResources(RGB_FILE, AUDIO_FILE);
-
+            seekBar.setMaximum(Settings.TOTAL_FRAMES);
+            seekBar.setMinimum(0);
             setLocationRelativeTo(null);
             setVisible(true);
-
-            play();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -50,31 +52,23 @@ public class AVPlayer extends javax.swing.JFrame {
         this.AUDIO_FILE = AUDIO_FILE;
 
         audioPlayer = new AudioPlayer(new FileInputStream(this.AUDIO_FILE));
-        frameStream = new FileInputStream(new File(this.FRAMES_FILE));
+        imageLoader = new ImageLoader(this.FRAMES_FILE);
 
     }
 
-    private BufferedImage getNextFrame() throws Exception {
-        BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        long len = WIDTH * HEIGHT * 3;
-        byte[] bytes = new byte[(int) len];
-
-        int offset = 0;
-        int numRead;
-        while (offset < bytes.length && (numRead = frameStream.read(bytes, offset, bytes.length - offset)) >= 0) {
-            offset += numRead;
-        }
+    private BufferedImage getFrameImage(byte[] bytes) {
+        BufferedImage img = new BufferedImage(Settings.WIDTH, Settings.HEIGHT, BufferedImage.TYPE_INT_RGB);
 
         //Generate Buffered Image
         int ind = 0;
-        for (int y = 0; y < HEIGHT; y++) {
+        for (int y = 0; y < Settings.HEIGHT; y++) {
 
-            for (int x = 0; x < WIDTH; x++) {
+            for (int x = 0; x < Settings.WIDTH; x++) {
 
                 byte a = 0;
                 byte r = bytes[ind];
-                byte g = bytes[ind + HEIGHT * WIDTH];
-                byte b = bytes[ind + HEIGHT * WIDTH * 2];
+                byte g = bytes[ind + Settings.PIXELS_PER_FRAME];
+                byte b = bytes[ind + Settings.PIXELS_PER_FRAME * 2];
 
                 int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
                 img.setRGB(x, y, pix);
@@ -85,39 +79,68 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     /*AV controls  to Play, Pause, and stop the video */
-    private void play() throws Exception{
+    private void play() throws Exception {
         audioPlayer.play();
-        Thread videoThread = new Thread(new Runnable() {
+
+        TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                while(true){
-                    try{
-                        frameContainer.setIcon(new ImageIcon(getNextFrame()));
-                        Thread.sleep(67);
-                    }catch(Exception ex){
-                        ex.printStackTrace();
+                try {
+
+                    byte[] image = imageLoader.getNext();
+                    frameContainer.setIcon(new ImageIcon(getFrameImage(image)));
+                    seekPositionVideo += 1;
+
+                    //update progress bar
+                    seekBar.setValue((int) seekPositionVideo);
+
+                    seekPositionAudio = audioPlayer.getPosition() / 1000;
+                    long predicted_current_frame = (int) (seekPositionAudio / 66.666);
+
+                    if (seekPositionVideo < predicted_current_frame) {
+                        imageLoader.skip((predicted_current_frame - seekPositionVideo) * Settings.BYTES_PER_FRAME);
+                        seekPositionVideo += (predicted_current_frame - seekPositionVideo);
                     }
+
+                    if (seekPositionVideo > predicted_current_frame) {
+                        Thread.sleep((seekPositionVideo - predicted_current_frame) * Settings.TIMER_INTERVAL);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
-        });
-        videoThread.start();
+        };
+
+        this.timer = new Timer();
+        this.timer.schedule(timerTask, 0, Settings.TIMER_INTERVAL);
     }
 
     private void pause() {
-
+        audioPlayer.pause();
+        this.timer.cancel();
     }
 
     private void stop() {
-
+        this.frameContainer.setIcon(new ImageIcon());
+        this.playButton.setText("PLAY");
+        this.isPlaying = false;
+        this.imageLoader = new ImageLoader(this.FRAMES_FILE);
+        this.seekBar.setValue(0);
+        audioPlayer.stop();
+        this.timer.cancel();
+        seekPositionVideo = 0;
+        seekPositionAudio = 0;
     }
 
     //USELESS
-    public void setFrame(BufferedImage img){
+    public void setFrame(BufferedImage img) {
         this.frameContainer.setIcon(new ImageIcon(img));
     }
-    public void setColor(Color color){
+
+    public void setColor(Color color) {
         this.controlContainer.setBackground(color);
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -228,10 +251,24 @@ public class AVPlayer extends javax.swing.JFrame {
 
     private void playButtonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        try {
+            if (isPlaying) {
+                isPlaying = false;
+                playButton.setText("PLAY");
+                pause();
+            } else {
+                isPlaying = true;
+                playButton.setText("PAUSE");
+                play();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        stop();
     }
 
 

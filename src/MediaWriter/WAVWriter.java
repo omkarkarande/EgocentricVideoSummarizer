@@ -45,7 +45,26 @@ public class WAVWriter {
         }
 
         InputStream is = new ByteArrayInputStream(audio);
-        AudioInputStream outStream = new AudioInputStream(is, loader.getAudioFormat(), loader.getBytesPerFrame() * setFrames);
+        AudioInputStream outStream = new AudioInputStream(is, loader.getAudioFormat(), audio.length);
+        AudioSystem.write(outStream, AudioFileFormat.Type.WAVE, outputFile);
+    }
+
+    public void writeFrames(int startFrame, int endFrame, File outputFile) throws Exception {
+        //byte array to store all audio data in the summarized wav
+        byte[] audio = new byte[loader.getBytesPerFrame() * (endFrame - startFrame + 1)];
+        int offset = 0;
+        //skip begining frames
+        loader.skip((long) (startFrame - 1) * loader.getBytesPerFrame());
+        //read frames
+        byte[] bytes;
+        for (int i = startFrame; i <= endFrame; i++) {
+            bytes = loader.getNext();
+            System.arraycopy(bytes, 0, audio, offset, bytes.length);
+            offset += bytes.length;
+        }
+
+        InputStream is = new ByteArrayInputStream(audio);
+        AudioInputStream outStream = new AudioInputStream(is, loader.getAudioFormat(), audio.length);
         AudioSystem.write(outStream, AudioFileFormat.Type.WAVE, outputFile);
     }
 }
