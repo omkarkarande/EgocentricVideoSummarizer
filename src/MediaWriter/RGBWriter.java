@@ -1,11 +1,6 @@
 package MediaWriter;
 
-import imageProcessing.Histogram;
-import org.opencv.core.Mat;
-
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.List;
 
 /**
  * Created by omi on 4/27/16.
@@ -31,16 +26,14 @@ public class RGBWriter {
             OutputStream os = new FileOutputStream(outputFile);
             for(int i = 0; i < frames.length; i++){
 
+                long len = WIDTH*HEIGHT*3;
+                byte[] bytes = new byte[(int)len];
 
-
-                    long len = WIDTH*HEIGHT*3;
-                    byte[] bytes = new byte[(int)len];
-
-                    int offset = 0;
-                    int numRead;
-                    while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
-                        offset += numRead;
-                    }
+                int offset = 0;
+                int numRead;
+                while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+                    offset += numRead;
+                }
                 if (frames[i]){
                     os.write(bytes);
                 }

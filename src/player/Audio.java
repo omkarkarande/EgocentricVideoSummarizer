@@ -26,7 +26,7 @@ public class Audio {
 	private Clip audioClip;
 	private int currentFrame = 0;
 	long currentTime = 0;
-	String name;
+	public String name;
 	AudioFormat af;
 	double frameRate = 0;
 

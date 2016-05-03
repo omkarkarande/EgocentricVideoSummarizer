@@ -1,6 +1,7 @@
-package player;
+/*package player;
+
+
 import java.awt.*;
-import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -40,9 +41,18 @@ public class Player {
 		//frame.getContentPane().setLayout(gLayout);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+		JPanel buttons = new JPanel();
+		buttons.setPreferredSize(new Dimension(width, 90));
+
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.setPreferredSize(new Dimension(400, height));
-		frame.getContentPane().add(buttonPanel, BorderLayout.EAST);
+		buttonPanel.setPreferredSize(new Dimension(width, 45));
+		buttons.add(buttonPanel,0);
+
+		JPanel advancedPanel = new JPanel();
+		advancedPanel.setPreferredSize(new Dimension(width, 45));
+		buttons.add(advancedPanel,1);
+
+		frame.getContentPane().add(buttons, BorderLayout.SOUTH);
 
 		JButton playButton = new JButton("PLAY");
 		playButton.addActionListener(new CustomActionListener());
@@ -55,6 +65,14 @@ public class Player {
 		JButton stopButton = new JButton("STOP");
 		stopButton.addActionListener(new CustomActionListener());
 		buttonPanel.add(stopButton, BorderLayout.NORTH);
+
+		JButton summarizeButton = new JButton("SUMMARIZE");
+		stopButton.addActionListener(new CustomActionListener());
+		advancedPanel.add(summarizeButton, BorderLayout.SOUTH);
+
+		JButton searchButton = new JButton("SEARCH");
+		stopButton.addActionListener(new CustomActionListener());
+		advancedPanel.add(searchButton, BorderLayout.SOUTH);
 
 
 		JLabel lbText1 = new JLabel("Video: " + vidFile);
@@ -101,7 +119,14 @@ public class Player {
 			else if(buttonText.equals("STOP")) {
 				stop();
 			}
+			else if(buttonText.equals("SUMMARIZER")) {
+				stop();
+			}
+			else if(buttonText.equals("SEARCH")) {
+				stop();
+			}
 		}
 	}
 
 }
+*/

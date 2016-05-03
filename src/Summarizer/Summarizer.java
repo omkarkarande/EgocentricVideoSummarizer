@@ -1,9 +1,12 @@
-/*import audioProcessing.*;
+package Summarizer;
+
+import MediaWriter.*;
+import audioProcessing.*;
 import imageProcessing.*;
 
 import java.io.File;
 import java.util.ArrayList;
-import MediaWriter.*;
+
 
 public class Summarizer {
 
@@ -13,6 +16,7 @@ public class Summarizer {
     private String OUTPUT_FILE_NAME;
 
     public Summarizer(String imageFile, String audioFile){
+        System.out.println("summarize");
         this.IMAGE_FILE_NAME = imageFile;
         this.AUDIO_FILE_NAME = audioFile;
     }
@@ -60,4 +64,3 @@ public class Summarizer {
         audioWriter.genAudio(framesToKeep, new File("/home/sailesh/Documents/summarized.wav"));
     }
 }
-*/

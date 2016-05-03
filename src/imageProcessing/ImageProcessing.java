@@ -19,6 +19,7 @@ public class ImageProcessing {
     private double MAX_DIFF = 259200;
     private double THRESHOLD = 0.35 * MAX_DIFF;
     private Histogram hist;
+    public static int keyFrameSize;
 
     public ImageProcessing(String fileName, int totalFrames, int width, int height) {
         try {
@@ -68,6 +69,7 @@ public class ImageProcessing {
             }
         }
 
+        keyFrameSize = keyFrames.size();
         return keyFrames;
     }
 }

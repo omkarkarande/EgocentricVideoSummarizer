@@ -14,7 +14,7 @@ public class Video {
 	File vidFile;
 	Audio audioPlayer;
 	FileInputStream is;
-	BufferedImage img;
+	public BufferedImage img;
 	Timer timer;
 	static int width = 480;
 	static int height = 270;
@@ -24,7 +24,7 @@ public class Video {
 	long interval = 67;
 	int currFrameNum;
 
-	public Video(String vidPath, Audio audioPlayer){
+		public Video(String vidPath, Audio audioPlayer){
 		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		this.audioPlayer = audioPlayer;
 		currFrameNum = 0;
@@ -62,11 +62,10 @@ public class Video {
 				}
 				else
 				{
-					//System.out.println("Expeted: " + expectedFrameNum + " curr: " + currFrameNum);
-					//syncFrames--;
-					currFrameNum +=syncFrames;
 					try{
 						is.skip(frameLength*syncFrames);
+						currFrameNum +=syncFrames;
+
 					}
 					catch (IOException e) {
 						e.printStackTrace();

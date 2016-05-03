@@ -3,53 +3,69 @@ package MediaWriter;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 
 /**
- * Created by omi on 4/27/16.
+ * Created by sailesh on 5/2/16.
  */
 public class WAVWriter {
-    private String INPUT_FILE_NAME;
-    public WAVWriter(String fileName){
-        this.INPUT_FILE_NAME = fileName;
+
+    private int BUFFER ;
+    private int AUDIOSAMPLES_PER_VIDEOFRAME = 1600;
+    AudioInputStream audStream;
+    InputStream ipStream;
+    String inFile;
+
+    public WAVWriter(String Filename){
+        this.inFile = Filename;
+
+        try {
+            ipStream = new FileInputStream(inFile);
+            audStream  = AudioSystem.getAudioInputStream(new BufferedInputStream(ipStream));
+            this.BUFFER = AUDIOSAMPLES_PER_VIDEOFRAME * audStream.getFormat().getFrameSize();
+
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void writeFrames(boolean[] frames, File outputFile){
-        //read Audio File
+    public void genAudio(boolean[] frames, File outFile){
+
         try {
-            InputStream waveStream = new FileInputStream(INPUT_FILE_NAME);
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(waveStream));
-            int audioFrameRate = (int)audioInputStream.getFormat().getFrameRate();
-            int frameCount = 0;
-            for(boolean set:frames){
-                if(set){
-                    frameCount += 1;
-                }
-            }
-            //System.out.println("TOTAL FRAMES: " + frameCount);
-            //handle zero case
-            //bytes to store one frame worth audio data
-            byte[] bytes = new byte[3200 * frameCount];
-            audioInputStream.read(bytes, 0, 3200);
-            int offset = 3200;
-            int lastFrameRead = 0;
 
-            for (int i = 1; i < frames.length; i++){
-                if (frames[i]){
-                    long toSkip = (i - 1 - lastFrameRead) * 3200;
-                    //System.out.println(i + " - " + toSkip);
-                    waveStream.skip(toSkip);
-                    audioInputStream.read(bytes, offset, 3200);
-                    offset += 3200;
-                    lastFrameRead = i;
+            int framesGen=0;
+            for(int i = 0; i < frames.length;i++){
+                if(frames[i])
+                    framesGen++;
+            }
+
+            byte[] byteArray = new byte[BUFFER*framesGen];
+            int offset = 0;
+
+            for(int i = 0; i < frames.length;i++){
+
+                if(frames[i]){
+                    audStream.read(byteArray,offset,BUFFER);
+                    offset+=BUFFER;
+                }
+                else {
+                    audStream.skip(BUFFER);
                 }
             }
 
-            InputStream is = new ByteArrayInputStream(bytes);
-            AudioInputStream outStream = new AudioInputStream(is, audioInputStream.getFormat(), 3200 * frameCount);
-            AudioSystem.write(outStream, AudioFileFormat.Type.WAVE, outputFile);
-
-        }catch(Exception ex){
+            InputStream is = new ByteArrayInputStream(byteArray);
+            AudioInputStream outStream = new AudioInputStream(is, audStream.getFormat(), BUFFER * framesGen);
+            AudioSystem.write(outStream, AudioFileFormat.Type.WAVE, outFile);
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
     }

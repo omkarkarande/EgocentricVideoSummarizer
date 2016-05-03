@@ -33,6 +33,7 @@ public class AudioProcessing {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        System.out.println("*************" + audioInputStream.getFormat().getFrameSize());
 
     }
 
