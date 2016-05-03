@@ -1,5 +1,3 @@
-package Player;
-
 import Configurations.Settings;
 import MediaLoader.ImageLoader;
 
@@ -18,7 +16,9 @@ public class AVPlayer extends javax.swing.JFrame {
 
     private String FRAMES_FILE;
     private String AUDIO_FILE;
-
+    private String SEARCH_FILE;
+    private int SEARCH_IMAGE_WIDTH;
+    private int SEARCH_IMAGE_HEIGHT;
     private boolean isPlaying;
     private long seekPositionVideo = 0;
     private long seekPositionAudio = 0;
@@ -27,14 +27,24 @@ public class AVPlayer extends javax.swing.JFrame {
     private ImageLoader imageLoader;
 
     private Timer timer;
+
     /**
      * Creates new form PlayerFrame
      */
-    public AVPlayer(String RGB_FILE, String AUDIO_FILE) {
+    public AVPlayer(String RGB_FILE, String AUDIO_FILE, String SEARCH_FILE, int searchImageWidth, int searchImageHeight) {
         initComponents();
+        this.SEARCH_FILE = SEARCH_FILE;
+        this.SEARCH_IMAGE_WIDTH = searchImageWidth;
+        this.SEARCH_IMAGE_HEIGHT = searchImageHeight;
+        this.FRAMES_FILE = RGB_FILE;
+        this.AUDIO_FILE = AUDIO_FILE;
         try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            this.playButton.setFocusPainted(false);
+            this.stopButton.setFocusPainted(false);
             loadResources(RGB_FILE, AUDIO_FILE);
-            seekBar.setMaximum(Settings.TOTAL_FRAMES);
+            System.out.println();
+            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
             seekBar.setMinimum(0);
             setLocationRelativeTo(null);
             setVisible(true);
@@ -48,11 +58,9 @@ public class AVPlayer extends javax.swing.JFrame {
        Utility functions to control the video Component
      */
     private void loadResources(String RGB_FILE, String AUDIO_FILE) throws Exception {
-        this.FRAMES_FILE = RGB_FILE;
-        this.AUDIO_FILE = AUDIO_FILE;
 
-        audioPlayer = new AudioPlayer(new FileInputStream(this.AUDIO_FILE));
-        imageLoader = new ImageLoader(this.FRAMES_FILE);
+        audioPlayer = new AudioPlayer(new FileInputStream(AUDIO_FILE));
+        imageLoader = new ImageLoader(RGB_FILE);
 
     }
 
@@ -92,8 +100,7 @@ public class AVPlayer extends javax.swing.JFrame {
                     seekPositionVideo += 1;
 
                     //update progress bar
-                    seekBar.setValue((int) seekPositionVideo);
-
+                    seekBar.setValue((int) (seekPositionAudio / 1000));
                     seekPositionAudio = audioPlayer.getPosition() / 1000;
                     long predicted_current_frame = (int) (seekPositionAudio / 66.666);
 
@@ -121,13 +128,16 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     private void stop() {
+
+        audioPlayer.stop();
+        this.timer.cancel();
+
         this.frameContainer.setIcon(new ImageIcon());
         this.playButton.setText("PLAY");
         this.isPlaying = false;
         this.imageLoader = new ImageLoader(this.FRAMES_FILE);
+
         this.seekBar.setValue(0);
-        audioPlayer.stop();
-        this.timer.cancel();
         seekPositionVideo = 0;
         seekPositionAudio = 0;
     }
@@ -155,6 +165,10 @@ public class AVPlayer extends javax.swing.JFrame {
         controlContainer = new javax.swing.JPanel();
         playButton = new javax.swing.JButton();
         stopButton = new javax.swing.JButton();
+        optionContainer = new javax.swing.JPanel();
+        loadOriginalButton = new javax.swing.JButton();
+        loadSearchedButton = new javax.swing.JButton();
+        loadSummarizedButton = new javax.swing.JButton();
         seekBar = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -203,16 +217,71 @@ public class AVPlayer extends javax.swing.JFrame {
             }
         });
 
+        optionContainer.setBackground(new java.awt.Color(50, 50, 50));
+        optionContainer.setMaximumSize(new java.awt.Dimension(480, 50));
+        optionContainer.setMinimumSize(new java.awt.Dimension(480, 50));
+
+        loadOriginalButton.setText("ORIGINAL");
+        loadOriginalButton.setPreferredSize(new java.awt.Dimension(80, 30));
+        loadOriginalButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadOriginalButtonActionPerformed(evt);
+            }
+        });
+
+        loadSearchedButton.setText("SEARCHED");
+        loadSearchedButton.setPreferredSize(new java.awt.Dimension(80, 30));
+        loadSearchedButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadSearchedButtonActionPerformed(evt);
+            }
+        });
+
+        loadSummarizedButton.setText("SUMMARIZED");
+        loadSummarizedButton.setPreferredSize(new java.awt.Dimension(80, 30));
+        loadSummarizedButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadSummarizedButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout optionContainerLayout = new javax.swing.GroupLayout(optionContainer);
+        optionContainer.setLayout(optionContainerLayout);
+        optionContainerLayout.setHorizontalGroup(
+                optionContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(optionContainerLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(loadOriginalButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(loadSummarizedButton, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(loadSearchedButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
+        );
+        optionContainerLayout.setVerticalGroup(
+                optionContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, optionContainerLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(optionContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(loadOriginalButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(loadSearchedButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(loadSummarizedButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
+        );
+
         javax.swing.GroupLayout controlContainerLayout = new javax.swing.GroupLayout(controlContainer);
         controlContainer.setLayout(controlContainerLayout);
         controlContainerLayout.setHorizontalGroup(
                 controlContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(controlContainerLayout.createSequentialGroup()
-                                .addGap(159, 159, 159)
+                                .addGap(151, 151, 151)
                                 .addComponent(playButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(stopButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(143, Short.MAX_VALUE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlContainerLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(optionContainer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         controlContainerLayout.setVerticalGroup(
                 controlContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -221,7 +290,9 @@ public class AVPlayer extends javax.swing.JFrame {
                                 .addGroup(controlContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(playButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(stopButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap())
+                                .addGap(0, 0, 0)
+                                .addComponent(optionContainer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, 0))
         );
 
         seekBar.setBackground(new java.awt.Color(255, 255, 255));
@@ -271,14 +342,64 @@ public class AVPlayer extends javax.swing.JFrame {
         stop();
     }
 
+    private void loadOriginalButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
+        stop();
+        try {
+            loadResources(this.FRAMES_FILE, this.AUDIO_FILE);
+            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSearchedButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
+        stop();
+        //call searcher
+        Searcher searcher = new Searcher(this.FRAMES_FILE);
+        try {
+            int frameNumber = searcher.search(this.SEARCH_FILE, this.SEARCH_IMAGE_WIDTH, this.SEARCH_IMAGE_HEIGHT);
+            System.out.println("Frame found: " + frameNumber);
+            searcher.dumpSnippet(frameNumber, this.FRAMES_FILE, this.AUDIO_FILE, "snippet");
+
+            loadResources("snippet.rgb", "snippet.wav");
+            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSummarizedButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
+        stop();
+
+        Summarizer summarizer = new Summarizer(this.FRAMES_FILE, this.AUDIO_FILE);
+        summarizer.summarize("summarized");
+        try {
+            loadResources("summarized.rgb", "summarized.wav");
+            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     // Variables declaration - do not modify
     private javax.swing.JPanel controlContainer;
     private javax.swing.JLabel frameContainer;
+    private javax.swing.JButton loadOriginalButton;
+    private javax.swing.JButton loadSearchedButton;
+    private javax.swing.JButton loadSummarizedButton;
+    private javax.swing.JPanel optionContainer;
     private javax.swing.JButton playButton;
     private javax.swing.JProgressBar seekBar;
     private javax.swing.JButton stopButton;
     private javax.swing.JPanel videoContainer;
     // End of variables declaration
+
 }
 

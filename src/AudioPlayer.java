@@ -1,5 +1,3 @@
-package Player;
-
 import java.io.*;
 import javax.sound.sampled.*;
 
@@ -31,7 +29,13 @@ public class AudioPlayer {
         audioClip.open(audioInputStream);
         audioFormat = audioClip.getFormat();
         audioFrameRate = audioFormat.getFrameRate();
+
     }
+
+    public void seek(long microSecondPosition){
+        this.audioClip.setMicrosecondPosition(microSecondPosition);
+    }
+
 
     public void play() throws Exception {
         audioClip.setMicrosecondPosition(currentTime);
