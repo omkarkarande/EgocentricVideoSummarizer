@@ -3,6 +3,8 @@ import MediaLoader.ImageLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.TimerTask;
@@ -44,8 +46,9 @@ public class AVPlayer extends javax.swing.JFrame {
             this.stopButton.setFocusPainted(false);
             loadResources(RGB_FILE, AUDIO_FILE);
             System.out.println();
-            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            seekBar.setMaximum((int) (audioPlayer.getLength() / 1000000));
             seekBar.setMinimum(0);
+            seekBar.addMouseListener(seekBarAdapter());
             setLocationRelativeTo(null);
             setVisible(true);
 
@@ -53,6 +56,22 @@ public class AVPlayer extends javax.swing.JFrame {
             ex.printStackTrace();
         }
     }
+
+
+    /*
+    Utility seekbar change
+     */
+    private MouseAdapter seekBarAdapter() {
+        MouseAdapter ma = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+
+            }
+        };
+        return ma;
+    }
+
 
     /*
        Utility functions to control the video Component
@@ -123,8 +142,10 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     private void pause() {
-        audioPlayer.pause();
-        this.timer.cancel();
+        if (this.timer != null) {
+            audioPlayer.pause();
+            this.timer.cancel();
+        }
     }
 
     private void stop() {
@@ -347,7 +368,7 @@ public class AVPlayer extends javax.swing.JFrame {
         stop();
         try {
             loadResources(this.FRAMES_FILE, this.AUDIO_FILE);
-            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            seekBar.setMaximum((int) (audioPlayer.getLength() / 1000000));
             play();
         } catch (Exception e) {
             e.printStackTrace();
@@ -361,12 +382,17 @@ public class AVPlayer extends javax.swing.JFrame {
         Searcher searcher = new Searcher(this.FRAMES_FILE);
         try {
             int frameNumber = searcher.search(this.SEARCH_FILE, this.SEARCH_IMAGE_WIDTH, this.SEARCH_IMAGE_HEIGHT);
-            System.out.println("Frame found: " + frameNumber);
-            searcher.dumpSnippet(frameNumber, this.FRAMES_FILE, this.AUDIO_FILE, "snippet");
+            if(frameNumber >= 0){
+                System.out.println("Frame found: " + frameNumber);
+                searcher.dumpSnippet(frameNumber, this.FRAMES_FILE, this.AUDIO_FILE, "snippet");
 
-            loadResources("snippet.rgb", "snippet.wav");
-            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
-            play();
+                loadResources("snippet.rgb", "snippet.wav");
+                seekBar.setMaximum((int) (audioPlayer.getLength() / 1000000));
+                play();
+            }else {
+                System.out.println("Image not found.");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -380,7 +406,7 @@ public class AVPlayer extends javax.swing.JFrame {
         summarizer.summarize("summarized");
         try {
             loadResources("summarized.rgb", "summarized.wav");
-            seekBar.setMaximum((int)(audioPlayer.getLength() / 1000000));
+            seekBar.setMaximum((int) (audioPlayer.getLength() / 1000000));
             play();
         } catch (Exception e) {
             e.printStackTrace();
