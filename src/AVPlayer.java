@@ -48,28 +48,12 @@ public class AVPlayer extends javax.swing.JFrame {
             System.out.println();
             seekBar.setMaximum((int) (audioPlayer.getLength() / 1000000));
             seekBar.setMinimum(0);
-            seekBar.addMouseListener(seekBarAdapter());
             setLocationRelativeTo(null);
             setVisible(true);
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-
-    /*
-    Utility seekbar change
-     */
-    private MouseAdapter seekBarAdapter() {
-        MouseAdapter ma = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-
-            }
-        };
-        return ma;
     }
 
 
@@ -342,7 +326,6 @@ public class AVPlayer extends javax.swing.JFrame {
     }// </editor-fold>
 
     private void playButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
         try {
             if (isPlaying) {
                 isPlaying = false;
@@ -359,12 +342,10 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
         stop();
     }
 
     private void loadOriginalButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
         stop();
         try {
             loadResources(this.FRAMES_FILE, this.AUDIO_FILE);
@@ -376,7 +357,6 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     private void loadSearchedButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
         stop();
         //call searcher
         Searcher searcher = new Searcher(this.FRAMES_FILE);
@@ -399,7 +379,6 @@ public class AVPlayer extends javax.swing.JFrame {
     }
 
     private void loadSummarizedButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
         stop();
 
         Summarizer summarizer = new Summarizer(this.FRAMES_FILE, this.AUDIO_FILE);
